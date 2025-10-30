@@ -1,0 +1,5 @@
+Default One Admin. 
+Admin can create a Seller (Company). 
+The Seller then can create Seller Users. 
+Seller Users Perform PRODUCT CRUD. 
+
