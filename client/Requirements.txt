@@ -1,0 +1,10 @@
+Sidebar for navigation - Logo, Below navigations in some sections (like user crud, product Crud) - Seller would be using majorly
+
+// src/views/private/Users/SellerUsers.jsx
+const SellerUsers = () => <h2>👥 Manage Seller Users</h2>;
+export default SellerUsers;
+
+// src/views/private/Users/SellerAdmins.jsx
+const SellerAdmins = () => <h2>👥 Manage Seller Admins</h2>;
+export default SellerAdmins;
+
