@@ -4,9 +4,10 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, App as AntApp } from "antd";
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './store/Store';
+import 'antd/dist/reset.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -14,7 +15,9 @@ root.render(
     <Provider store={store}>
       <ConfigProvider theme={{ token: { colorPrimary: '#1890ff' } }}>
         <PersistGate loading={null} persistor={persistor}>
-          <App />
+          <AntApp>
+            <App />
+          </AntApp>
         </PersistGate>
       </ConfigProvider>
     </Provider>

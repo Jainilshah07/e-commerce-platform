@@ -43,7 +43,7 @@ export const createProduct = async (req, res) => {
   } catch (error) {
     console.error('❌ Create Product Error:', error);
     console.log('❌ Create Product Error:', error);
-    
+
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -69,10 +69,10 @@ export const getProductsBySeller = async (req, res) => {
   try {
     const seller_id = req.user.seller_id; // From authenticated user token
     const products = await Product.findAll({
-      where: { seller_id },  
+      where: { seller_id },
       include: [
         { model: Category, attributes: ['name'] },
-        { model: Seller, attributes: ['name'] }, 
+        { model: Seller, attributes: ['name'] },
         { model: ProductImage, attributes: ['img_url'] }
       ]
     });
@@ -81,7 +81,7 @@ export const getProductsBySeller = async (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
-}; 
+};
 
 // READ - Product by Slug
 export const getProductBySlug = async (req, res) => {
@@ -128,36 +128,26 @@ export const updateProduct = async (req, res) => {
     await product.update({ name, description, price, category_id });
 
     // ✅ Handle new images if uploaded
-    if (req.files && req.files.length > 0 || retained_images) {
-      // Delete old images from product_images table
+    if (req.files && req.files.length > 0) {
+      // Delete old images
       await ProductImage.destroy({ where: { product_id: product.id } });
 
-      if (req.files && req.files.length > 0) {
-        const mainImageUrl = `/uploads/products/${req.files[0].filename}`;
-        await product.update({ img_url: mainImageUrl }); // Update main image
+      // Update main image
+      const mainImageUrl = `/uploads/products/${req.files[0].filename}`;
+      await product.update({ img_url: mainImageUrl });
 
-        const images = req.files.map(file => ({
-            product_id: product.id,
-            img_url: `/uploads/products/${file.filename}`
-        }));
-        await ProductImage.bulkCreate(images);
-    }
-
-      // Update main product image (first uploaded image)
-      // const mainImageUrl = `/uploads/products/${req.files[0].filename}`;
-      // await product.update({ img_url: mainImageUrl });
-
-      // // Save all new images
-      // const images = req.files.map(file => ({
-      //   product_id: product.id,
-      //   img_url: `/uploads/products/${file.filename}`
-      // }));
-      // await ProductImage.bulkCreate(images);
+      // Save all new images
+      const images = req.files.map(file => ({
+        product_id: product.id,
+        img_url: `/uploads/products/${file.filename}`,
+      }));
+      await ProductImage.bulkCreate(images);
     }
 
     res.json({ message: 'Product updated successfully', product });
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Update Product Error:', err);
+    return res.status(500).json({ error: err.message || 'Server error' });
   }
 };
 
@@ -175,7 +165,7 @@ export const deleteProduct = async (req, res) => {
 
     // Delete associated images
     await ProductImage.destroy({ where: { product_id: id } });
-    
+
     // Soft delete product (paranoid: true)
     await product.destroy();
 

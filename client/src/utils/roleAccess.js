@@ -9,7 +9,7 @@ export const menuConfig = {
       key: 'userMgmt',
       label: 'User Management',
       children: [
-        { key: '/user/sellers', label: 'Seller Admins', path: '/views/private/user/sellers' },
+        { key: '/user/sellers', label: 'Add Seller Admins', path: '/views/private/user/add-seller-admin' },
         { key: '/user', label: 'View Users', path: '/views/private/user/view-users' },
       ],
     },
@@ -20,7 +20,7 @@ export const menuConfig = {
       key: 'userMgmt',
       label: 'User Management',
       children: [
-        { key: '/user/seller-users', label: 'Seller Users', path: '/user/seller-users' },
+        { key: '/user/seller-users', label: 'Add Seller Users', path: '/views/private/user/add-seller-users' },
       ],
     },
     {
