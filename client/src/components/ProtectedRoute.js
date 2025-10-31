@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
  * to restrict access.
  */
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { user } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.users);
 
   // 1️⃣ Not logged in
   if (!user) return <Navigate to="/views/public/login" replace />;

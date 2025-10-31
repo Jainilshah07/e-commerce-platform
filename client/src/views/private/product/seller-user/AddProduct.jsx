@@ -1,7 +1,7 @@
 import React from "react";
 import { Formik, Form, Field } from "formik";
 import { Form as AntForm, Input, Button, Card, Upload, message } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, PlusOutlined } from "@ant-design/icons";
 import api from '../../../../Api';
 import { useSelector } from "react-redux";
 import * as Yup from "yup";
@@ -12,6 +12,13 @@ const schema = Yup.object().shape({
   description: Yup.string().required("Required"),
   category_id: Yup.number().required("Required"),
 });
+
+const uploadButton = (
+  <div>
+    <PlusOutlined />
+    <div style={{ marginTop: 8 }}>Upload</div>
+  </div>
+);
 
 const AddProduct = () => {
   const { user } = useSelector((state) => state.users);
@@ -62,17 +69,17 @@ const AddProduct = () => {
         validationSchema={schema}
         onSubmit={handleSubmit}
       >
-        {({ handleChange, setFieldValue, isSubmitting }) => (
+        {({ handleChange, setFieldValue, isSubmitting, values }) => (
           <Form>
-            <AntForm.Item label="Product Name">
+            <AntForm.Item label="Product Name" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
               <Field as={Input} name="name" onChange={handleChange} />
             </AntForm.Item>
 
-            <AntForm.Item label="Price">
+            <AntForm.Item label="Price" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
               <Field as={Input} name="price" onChange={handleChange} />
             </AntForm.Item>
 
-            <AntForm.Item label="Description">
+            <AntForm.Item label="Description" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
               <Field
                 as={Input.TextArea}
                 name="description"
@@ -81,29 +88,39 @@ const AddProduct = () => {
               />
             </AntForm.Item>
 
-            <AntForm.Item label="Category ID">
+            <AntForm.Item label="Category ID" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
               <Field as={Input} name="category_id" onChange={handleChange} />
             </AntForm.Item>
 
             {/* ✅ Proper Upload handling */}
-            <Upload
-              listType="picture"
-              multiple
-              beforeUpload={() => false} // prevent auto upload
-              onChange={({ fileList }) => setFieldValue("images", fileList)}
-            >
-              <Button icon={<UploadOutlined />}>Upload Images (max 3)</Button>
-            </Upload>
+            <AntForm.Item label="Product Images" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+              <Upload
+                listType="picture-card"
+                multiple
+                maxCount={3}
+                beforeUpload={() => false}
+                // Bind the fileList prop to Formik state for display
+                fileList={values.images} 
+                // Update Formik state on change
+                onChange={({ fileList }) => setFieldValue("images", fileList)}
+                onPreview={() => {}} // Ant Design requires this for listType="picture-card"
+              >
+                {/* 🐛 FIX: Render the custom 'uploadButton' component, not a string */}
+                {values.images.length >= 3 ? null : uploadButton}
+              </Upload>
+            </AntForm.Item>
 
-            <Button
-              htmlType="submit"
-              type="primary"
-              loading={isSubmitting}
-              block
-              style={{ marginTop: 16 }}
-            >
-              Create Product
-            </Button>
+            <AntForm.Item wrapperCol={{ offset: 6, span: 18 }}>
+              <Button
+                htmlType="submit"
+                type="primary"
+                loading={isSubmitting}
+                block
+                style={{ marginTop: 16 }}
+              >
+                Create Product
+              </Button>
+            </AntForm.Item>
           </Form>
         )}
       </Formik>
