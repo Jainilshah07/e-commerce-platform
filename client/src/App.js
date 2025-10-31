@@ -6,19 +6,20 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { App as AntApp } from 'antd';
 
 // Public pages
-import ProductList from './views/public/ProductList';
-// import ProductDetail from './views/public/ProductDetail';
 import Login from './views/public/Login';
+import ProductList from './views/public/ProductList';
 import ProductDetail from './views/public/ProductDetail';
-import MyProducts from './views/private/product/seller-user/MyProducts';
-import AddProduct from './views/private/product/seller-user/AddProduct';
+import NotFound from './views/NotFound';
 
 // Private pages
+import MyProducts from './views/private/product/seller-user/MyProducts';
+import AddProduct from './views/private/product/seller-user/AddProduct';
+import UpdateProduct from './views/private/product/seller-user/UpdateProduct';
+
+import ViewUsers from './views/private/user/Users';
 // import SellerAdmins from './views/private/Users/SellerAdmins';
 // import SellerUsers from './views/private/Users/SellerUsers';
 // import ProductCreate from './views/private/Products/ProductCreate';
-import NotFound from './views/NotFound';
-import ViewUsers from './views/private/user/Users';
 
 const App = () => {
   return (
@@ -75,6 +76,14 @@ const App = () => {
                 <ProtectedRoute allowedRoles={['seller_admin', 'seller_user']}>
                   {/* <ProductCreate /> */}
                   <AddProduct />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/views/private/products/update-product/:slug"
+              element={
+                <ProtectedRoute allowedRoles={['seller_admin', 'seller_user']}>
+                  <UpdateProduct />
                 </ProtectedRoute>
               }
             />

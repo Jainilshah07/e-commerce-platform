@@ -105,10 +105,12 @@ export const getProductBySlug = async (req, res) => {
 // UPDATE Product
 export const updateProduct = async (req, res) => {
   try {
-    const { id } = req.params;
+    // const { id } = req.params; //
+    const { slug } = req.params;
     const { name, description, price, category_id } = req.body;
 
-    const product = await Product.findByPk(id);
+    // const product = await Product.findByPk(id); //
+    const product = await Product.findOne({ where: { slug } });
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
     // ✅ Check if user is the owner
@@ -121,25 +123,36 @@ export const updateProduct = async (req, res) => {
       return res.status(400).json({ message: 'Maximum 3 images allowed per product' });
     }
 
-    if (name) product.slug = slugify(name, { lower: true, strict: true });
+    // if (name) product.slug = slugify(name, { lower: true, strict: true });
 
     await product.update({ name, description, price, category_id });
 
     // ✅ Handle new images if uploaded
-    if (req.files && req.files.length > 0) {
+    if (req.files && req.files.length > 0 || retained_images) {
       // Delete old images from product_images table
       await ProductImage.destroy({ where: { product_id: product.id } });
 
-      // Update main product image (first uploaded image)
-      const mainImageUrl = `/uploads/products/${req.files[0].filename}`;
-      await product.update({ img_url: mainImageUrl });
+      if (req.files && req.files.length > 0) {
+        const mainImageUrl = `/uploads/products/${req.files[0].filename}`;
+        await product.update({ img_url: mainImageUrl }); // Update main image
 
-      // Save all new images
-      const images = req.files.map(file => ({
-        product_id: product.id,
-        img_url: `/uploads/products/${file.filename}`
-      }));
-      await ProductImage.bulkCreate(images);
+        const images = req.files.map(file => ({
+            product_id: product.id,
+            img_url: `/uploads/products/${file.filename}`
+        }));
+        await ProductImage.bulkCreate(images);
+    }
+
+      // Update main product image (first uploaded image)
+      // const mainImageUrl = `/uploads/products/${req.files[0].filename}`;
+      // await product.update({ img_url: mainImageUrl });
+
+      // // Save all new images
+      // const images = req.files.map(file => ({
+      //   product_id: product.id,
+      //   img_url: `/uploads/products/${file.filename}`
+      // }));
+      // await ProductImage.bulkCreate(images);
     }
 
     res.json({ message: 'Product updated successfully', product });

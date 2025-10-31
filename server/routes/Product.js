@@ -22,7 +22,7 @@ const allowSellerUser = (req, res, next) => {
 
 // CRUD routes (only for seller_user)
 router.post('/', verifyToken, allowSellerUser, upload.array('images', 3), createProduct);
-router.put('/:id', verifyToken, allowSellerUser, upload.array('images', 3), updateProduct);
+router.patch('/:slug', verifyToken, allowSellerUser, upload.array('images', 3), updateProduct);
 router.delete('/:id', verifyToken, allowSellerUser, deleteProduct);
 router.get('/seller', verifyToken, getProductsBySeller);
 

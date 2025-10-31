@@ -36,7 +36,7 @@ const MyProducts = () => {
       title: 'Actions',
       render: (_, record) => (
         <Space>
-          <Button onClick={() => navigate(`/products/edit/${record.id}`)}>Edit</Button>
+          <Button onClick={() => navigate(`/views/private/products/update-product/${record.slug}`)}>Edit</Button>
           <Button danger onClick={() => handleDelete(record.id)}>
             Delete
           </Button>
@@ -49,7 +49,7 @@ const MyProducts = () => {
     <div>
       <Button
         type="primary"
-        onClick={() => navigate('/products/create')}
+        onClick={() => navigate('/views/private/products/add-product')}
         style={{ marginBottom: 16 }}
       >
         + Add Product

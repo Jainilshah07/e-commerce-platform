@@ -19,7 +19,7 @@ const MainLayout = () => {
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.users);
-  console.log('Current User in Layout:', user);
+  // console.log('Current User in Layout:', user);
   const [collapsed, setCollapsed] = useState(false);
 
   const role = user?.role || 'public';
