@@ -18,7 +18,7 @@ const MainLayout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { user } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.users);
   const [collapsed, setCollapsed] = useState(false);
 
   const role = user?.role || 'public';

@@ -14,7 +14,7 @@ const ProductList = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <Spin tip="Loading products..." />;
+  if (loading) return <Spin fullscreen tip="Loading products..." />;
 
   return (
     <div>

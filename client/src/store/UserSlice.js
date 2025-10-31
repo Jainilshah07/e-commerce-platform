@@ -1,29 +1,25 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  user: null,
+  users: null,
   token: null,
 };
 
-const userSlice = createSlice({
-  name: 'user',
+const usersSlice = createSlice({
+  name: 'users',
   initialState,
   reducers: {
     loginSuccess: (state, action) => {
-      state.user = action.payload.user;
+      state.users = action.payload.users;
       state.token = action.payload.token;
     },
     logout: (state) => {
-      state.user = null;
+      state.users = null;
       state.token = null;
-      localStorage.removeItem('auth');
-    },
-    restoreSession: (state, action) => {
-      state.user = action.payload.user;
-      state.token = action.payload.token;
+      // localStorage.clear(); // optional
     },
   },
 });
 
-export const { loginSuccess, logout, restoreSession } = userSlice.actions;
-export default userSlice.reducer;
+export const { loginSuccess, logout, restoreSession } = usersSlice.actions;
+export default usersSlice.reducer;

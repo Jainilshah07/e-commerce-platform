@@ -14,7 +14,7 @@ const schema = Yup.object().shape({
 });
 
 const AddProduct = () => {
-  const { user } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.users);
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {

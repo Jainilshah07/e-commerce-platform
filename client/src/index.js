@@ -5,14 +5,17 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import { ConfigProvider } from 'antd';
-import store from './store/Store';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './store/Store';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <Provider store={store}>
       <ConfigProvider theme={{ token: { colorPrimary: '#1890ff' } }}>
-        <App />
+        <PersistGate loading={null} persistor={persistor}>
+          <App />
+        </PersistGate>
       </ConfigProvider>
     </Provider>
   </React.StrictMode>

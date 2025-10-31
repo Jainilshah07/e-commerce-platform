@@ -1,22 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Table, Button, Space, message } from 'antd';
 import api from '../../../Api';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 const ViewUsers = () => {
-  const { user } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.users);
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
-  const fetchUsers = async () => {
+  // const fetchUsers = async () => {
+  //   try {
+  //     const res = await api.get(`/user`);
+  //     setUsers(res.data);
+  //   } catch {
+  //     message.error('Error fetching Users');
+  //   }
+  // };
+  const fetchUsers = useCallback(async () => {
     try {
       const res = await api.get(`/user`);
       setUsers(res.data);
     } catch {
       message.error('Error fetching Users');
     }
-  };
+  }, []);
 
   const handleDelete = async (id) => {
     await api.delete(`/products/${id}`);

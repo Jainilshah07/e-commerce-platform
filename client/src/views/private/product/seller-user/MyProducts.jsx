@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 const MyProducts = () => {
-  const { user } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.users);
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
