@@ -1,11 +1,13 @@
 import React from "react";
 import { Formik, Form, Field } from "formik";
-import { Form as AntForm, Input, Button, Modal, Card, Upload, message } from "antd";
+import { Form as AntForm, Select, Input, Button, Card, Upload, Modal, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import api from "../../../../Api";
 import { useSelector } from "react-redux";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useEffect } from "react";
 
 const schema = Yup.object().shape({
   name: Yup.string().required("Required"),
@@ -24,41 +26,44 @@ const uploadButton = (
 const AddProduct = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.users);
-  const [modal, contextHolder] = Modal.useModal(); // ✅ new antd v5 hook
+  const [modal, contextHolder] = Modal.useModal();
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/products/getCategories");
+        setCategories(res.data);
+      } catch {
+        message.error("Error fetching categories");
+      } 
+    };
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      const formData = new FormData();
-      formData.append("name", values.name);
-      formData.append("description", values.description);
-      formData.append("price", values.price);
-      formData.append("category_id", values.category_id);
-      formData.append("seller_id", user.seller_id);
+      const payload = {
+        name: values.name,
+        description: values.description,
+        price: values.price,
+        category_id: values.category_id,
+        temp_files: values.temp_files, // 👈 Only temp paths sent
+      };
 
-      (values.images || []).forEach((fileWrapper) => {
-        formData.append("images", fileWrapper.originFileObj);
+      const res = await api.post("/products", payload, {
+        headers: { Authorization: `Bearer ${user.token}` },
       });
 
-      const res = await api.post("/products", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
-
-      // ✅ New proper modal way (works with context + theming)
       modal.success({
-        title: "Product Added",
+        title: "Product Created",
         content: `${values.name} has been created successfully.`,
-        centered: true,
         okText: "Go to My Products",
-        onOk: () => {
-          resetForm();
-          navigate("/views/private/products/my-products");
-        },
+        centered: true,
+        onOk: () => navigate("/views/private/products/my-products"),
       });
 
-      console.log("Product Created:", res.data);
+      resetForm();
     } catch (err) {
       console.error("❌ Error:", err);
       message.error(err.response?.data?.message || "Error creating product");
@@ -67,9 +72,26 @@ const AddProduct = () => {
     }
   };
 
+  const handleTempUpload = async ({ file, onSuccess, onError }) => {
+    try {
+      const formData = new FormData();
+      formData.append("files", file);
+
+      const res = await api.post("/temp-upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      onSuccess(res.data, file); // ✅ Let AntD know upload succeeded
+      return res.data.files[0]; // return { filename, temp_path }
+    } catch (err) {
+      console.error("Upload error:", err);
+      onError(err);
+    }
+  };
+
   return (
     <>
-      {contextHolder} {/* ✅ Must be rendered in JSX for modal to work */}
+      {contextHolder}
       <Card title="Add New Product" style={{ maxWidth: 600, margin: "0 auto" }}>
         <Formik
           initialValues={{
@@ -78,6 +100,7 @@ const AddProduct = () => {
             price: "",
             category_id: "",
             images: [],
+            temp_files: [],
           }}
           validationSchema={schema}
           onSubmit={handleSubmit}
@@ -102,17 +125,37 @@ const AddProduct = () => {
               </AntForm.Item>
 
               <AntForm.Item label="Category ID" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
-                <Field as={Input} name="category_id" onChange={handleChange} />
+                {/* <Field as={Select} name="category_id" onChange={(value) => setFieldValue('category_id', value)} />
+                 */}
+                <Select
+                  name="category_id"
+                  onChange={(value) => setFieldValue("category_id", value)}
+                  placeholder="Select a category"
+                  value={values.category_id}
+                >
+                  {categories.map((cat) => (
+                    <Select.Option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </Select.Option>
+                  ))}
+                </Select>
               </AntForm.Item>
 
+              {/* ✅ Upload handled via temp-upload */}
               <AntForm.Item label="Product Images" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
                 <Upload
+                  customRequest={handleTempUpload}
                   listType="picture-card"
                   multiple
                   maxCount={3}
-                  beforeUpload={() => false}
-                  fileList={values.images}
-                  onChange={({ fileList }) => setFieldValue("images", fileList)}
+                  onChange={({ fileList }) => {
+                    setFieldValue("images", fileList);
+                    // extract uploaded file paths
+                    const uploadedPaths = fileList
+                      .filter(f => f.response && f.response.files)
+                      .map(f => f.response.files[0].temp_path);
+                    setFieldValue("temp_files", uploadedPaths);
+                  }}
                   onPreview={() => {}}
                 >
                   {values.images.length >= 3 ? null : uploadButton}

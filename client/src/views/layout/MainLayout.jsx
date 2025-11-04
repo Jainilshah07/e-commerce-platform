@@ -41,6 +41,13 @@ const MainLayout = () => {
         onCollapse={(val) => setCollapsed(val)}
         theme="light"
         width={230}
+        style={{
+          height: '100vh',         // ⬅️ make sidebar full viewport height
+          position: 'fixed',       // ⬅️ fix it to the left
+          left: 0,
+          top: 0,
+          overflow: 'auto',        // ⬅️ allow scroll inside sidebar if needed
+        }}
       >
         {/* Logo / App name */}
         <Link to={`/views/public/home`}><div
@@ -99,11 +106,11 @@ const MainLayout = () => {
           {user ? (
             <div>
               {!collapsed && (
-                <div style={{ marginBottom: 8, fontSize: 15, fontWeight:'bolder', color: '#484848ff' }}> 
+                <div style={{ marginBottom: 8, fontSize: 15, fontWeight: 'bolder', color: '#484848ff' }}>
                   <div style={{ marginBottom: 8, fontSize: 15, fontWeight: 'bold', color: '#484848ff' }}>
-                    Welcome 
+                    Welcome
                   </div>
-                   {user.fullname}
+                  {user.fullname}
                 </div>
               )}
               <Button
@@ -112,7 +119,7 @@ const MainLayout = () => {
                 onClick={handleLogout}
                 style={{ color: '#d4380d' }}
               >
-                Logout
+                {!collapsed &&( <span>Logout</span>) }
               </Button>
             </div>
           ) : (
@@ -128,13 +135,18 @@ const MainLayout = () => {
       </Sider>
 
       {/* Right Content */}
-      <Layout>
+      <Layout
+        style={{
+          marginLeft: collapsed ? 80 : 230,  // ⬅️ adjust right content to sidebar width
+          transition: 'margin-left 0.2s',
+        }}>
         <Content
           style={{
             margin: '24px 16px',
             padding: 24,
             background: '#fff',
             borderRadius: 8,
+            minHeight: '100vh', // Ensure full height
           }}
         >
           <Outlet /> {/* renders nested route content */}

@@ -13,7 +13,7 @@ const rootReducer = combineReducers({
 
 // Configure persist
 const persistConfig = {
-  key: 'root',
+  key: 'root:practice_project',
   storage,
   whitelist: ['users'], // only persist login session (products fetched from API anyway)
 };

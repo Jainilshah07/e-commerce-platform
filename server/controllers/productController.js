@@ -1,27 +1,53 @@
 import { Product, ProductImage, Category, Seller } from '../models/index.js';
-import slugify from 'slugify';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { moveFile } from "../utils/fileHelpers.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // CREATE Product
+
+// GET /api/categories
+export const getCategories = async (req, res) => {
+  try {
+    const categories = await Category.findAll({
+      attributes: ['id', 'name'],
+    });
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
 export const createProduct = async (req, res) => {
   try {
-    const { name, description, price, category_id } = req.body;
-    console.log('Body:', req.body);
-    console.log('Files:', req.files);
-
-    // seller_user's seller_id from token
+    const { name, description, price, category_id, temp_files } = req.body;
     const seller_id = req.user.seller_id;
 
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: 'At least one product image is required' });
+    // validate
+    if (!temp_files || temp_files.length === 0)
+      return res.status(400).json({ message: "At least one image is required." });
+
+    // Convert string to array if client sends JSON string
+    const tempFiles = Array.isArray(temp_files)
+      ? temp_files
+      : JSON.parse(temp_files);
+
+    // ✅ Move from temp → final
+    const finalPaths = [];
+    for (const tempPath of tempFiles) {
+      const oldPath = path.join(__dirname, "..", tempPath);
+      const fileName = path.basename(tempPath);
+      const newPath = path.join(__dirname, "..", "uploads", "products", fileName);
+
+      await moveFile(oldPath, newPath);
+      finalPaths.push(`/uploads/products/${fileName}`);
     }
 
-    // ✅ Validate max 3 images
-    if (req.files.length > 3) {
-      return res.status(400).json({ message: 'Maximum 3 images allowed per product' });
-    }
-
-    // ✅ Use first image as main product image
-    const mainImageUrl = `/uploads/products/${req.files[0].filename}`;
+    const mainImageUrl = finalPaths[0];
 
     const product = await Product.create({
       name,
@@ -29,22 +55,23 @@ export const createProduct = async (req, res) => {
       price,
       category_id,
       seller_id,
-      img_url: mainImageUrl // Main/featured image
+      img_url: mainImageUrl,
     });
 
-    // ✅ Save all images to product_images table
-    const images = req.files.map(file => ({
+    const imageRecords = finalPaths.map((img) => ({
       product_id: product.id,
-      img_url: `/uploads/products/${file.filename}`
+      img_url: img,
     }));
-    await ProductImage.bulkCreate(images);
+    await ProductImage.bulkCreate(imageRecords);
 
-    res.status(201).json({ message: '✅ Product created successfully', product });
-  } catch (error) {
-    console.error('❌ Create Product Error:', error);
-    console.log('❌ Create Product Error:', error);
-
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(201).json({
+      message: "✅ Product created successfully",
+      product,
+      images: finalPaths,
+    });
+  } catch (err) {
+    console.error("❌ Create Product Error:", err);
+    res.status(500).json({ message: err.message || "Internal Server Error" });
   }
 };
 

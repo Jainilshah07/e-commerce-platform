@@ -3,6 +3,7 @@ import upload from '../middleware/UploadFiles.js';
 import {
   createProduct,
   getProducts,
+  getCategories,
   getProductsBySeller,
   getProductBySlug,
   updateProduct,
@@ -21,13 +22,16 @@ const allowSellerUser = (req, res, next) => {
 };
 
 // CRUD routes (only for seller_user)
-router.post('/', verifyToken, allowSellerUser, upload.array('images', 3), createProduct);
-router.patch('/:slug', verifyToken, allowSellerUser, upload.array('images', 3), updateProduct);
-router.delete('/:id', verifyToken, allowSellerUser, deleteProduct);
+router.post('/', verifyToken, upload.array('images', 3), createProduct);
+router.patch('/:slug', verifyToken, upload.array('images', 3), updateProduct);
 router.get('/seller', verifyToken, getProductsBySeller);
+router.delete('/:id', verifyToken, allowSellerUser, deleteProduct);
+
 
 // Public product access
 router.get('/', getProducts);
+router.get('/getCategories', getCategories);
 router.get('/:slug', getProductBySlug);
+
 
 export default router;

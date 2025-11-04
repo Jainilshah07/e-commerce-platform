@@ -6,9 +6,9 @@ import { useSelector } from "react-redux";
 import * as Yup from "yup";
 
 const schema = Yup.object().shape({
-    fullname: Yup.string().required("Required"),
-    email: Yup.string().email('Invalid email').required('Required'),
-    password: Yup.string().required("Required")
+    fullname: Yup.string().required("Full Name is Required"),
+    email: Yup.string().email('Invalid email').required('Email is Required'),
+    password: Yup.string().required("Password is Required")
 });
 
 const AddSeller = () => {
@@ -51,17 +51,23 @@ const AddSeller = () => {
                 validationSchema={schema}
                 onSubmit={handleSubmit}
             >
-                {({ handleChange, setFieldValue, isSubmitting }) => (
+                {({ handleChange, setFieldValue, touched, errors, isSubmitting }) => (
                     <Form>
-                        <AntForm.Item label="Seller Name" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+                        <AntForm.Item label="Seller Name" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}
+                            validateStatus={touched.fullname && errors.fullname ? "error" : ""}
+                            help={touched.fullname && errors.fullname ? errors.fullname : ""}>
                             <Field as={Input} name="fullname" placeholder="Seller_admin" onChange={handleChange} />
                         </AntForm.Item>
 
-                        <AntForm.Item label="Email" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+                        <AntForm.Item label="Email" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}
+                            validateStatus={touched.email && errors.email ? "error" : ""}
+                            help={touched.email && errors.email ? errors.email : ""}>
                             <Field as={Input} name="email" placeholder="seller_admin@gmail.com" onChange={handleChange} />
                         </AntForm.Item>
 
-                        <AntForm.Item label="Password" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+                        <AntForm.Item label="Password" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}
+                            validateStatus={touched.password && errors.password ? "error" : ""}
+                            help={touched.password && errors.password ? errors.password : ""}>
                             <Field
                                 as={Input.Password}
                                 name="password"
